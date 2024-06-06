@@ -39,7 +39,7 @@ jobs:
     - test
     runs-on: ubuntu-latest
     environment:
-      name: testpypi
+      name: pypi
       url: https://pypi.org/p/telicent-validation-tool
     permissions:
       id-token: write
