@@ -1,0 +1,98 @@
+[build-system]
+requires = ["setuptools>=61.2.0", "wheel==0.41.3", "pip-tools==7.3.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telicent-validation-tool"
+version = "0.0.0"
+authors = [{name = "Telicent Ltd", email = "opensource@telicent.io"}]
+description = "A library for validating data before it is brought in to Telicnt CORE."
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+readme = "README.md"
+dependencies = [
+    "jsonschema==4.22.0",
+    "rdflib==6.3.2",
+    "telicent-owl2shacl==0.2.4"
+]
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit==3.5.0",
+    "ruff==0.1.5",
+    "mypy==1.7.0",
+    "coverage==7.5.3",
+]
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.md"]}
+
+[tool.ruff]
+target-version = "py311"
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
+]
+ignore = [
+    "C901", # too complex
+]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+line-length = 120
+
+[project.urls]
+Repository = "https://github.com/telicent-oss/validation-tool"
+
+[tool.distutils.bdist_wheel]
+universal = true
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["telicent_validation_tool*"]
+namespaces = true
+
+[tool.mypy]
+no_implicit_optional = false
+ignore_missing_imports = true
+modules = ["telicent_validation_tool", "tests"]
+python_version = 3.11
