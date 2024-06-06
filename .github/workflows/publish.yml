@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://test.pypi.org/p/telicent-validation-tool
+      url: https://pypi.org/p/telicent-validation-tool
     permissions:
       id-token: write
     steps:
@@ -52,8 +52,6 @@ jobs:
 
     - name: Publish distribution to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
 
   do-github-release:
     name: Do GitHub Release
