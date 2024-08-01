@@ -5,23 +5,7 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from rdflib import Graph
 from shacltool.owl2shacl import rdf_validate
-
-__license__ = """
-Copyright (c) Telicent Ltd.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
-
+from pyshacl import validate as shacl_validate
 
 logger = logging.getLogger(__name__)
 
@@ -72,10 +56,9 @@ def validate_rdf_turtle(data: Graph, shacl_parts: list, ontology_parts: list) ->
     compound_ontology_graph = Graph()
     for ontology_part in ontology_parts:
         compound_ontology_graph += compound_ontology_graph.parse(location=ontology_part, format="turtle")
+    
+    is_valid, result_graph, _ = shacl_validate(data, compound_shacl_graph, compound_ontology_graph, allow_warnings=True)
 
-    is_valid, result_graph, _ = rdf_validate(
-        data, compound_ontology_graph, compound_shacl_graph
-    )
     logger.debug({result_graph.serialize()})
 
     if is_valid:
