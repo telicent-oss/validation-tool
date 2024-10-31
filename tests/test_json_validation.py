@@ -25,6 +25,10 @@ limitations under the License.
 
 class JSONImplementationTestCase(TestCase):
 
+    def setUp(self):
+        from telicent_validation_tool import validators
+        validators.json_schema_cache = {}
+
     @staticmethod
     def test_opens_specified_file():
         with patch("builtins.open", mock_open(read_data="{}")) as mock_file:
@@ -55,3 +59,18 @@ class JSONImplementationTestCase(TestCase):
                 side_effect=ValidationError('Invalid')
             ):
                 self.assertRaises(TelicentValidationError, validate_json, '{}', 'my_file')
+
+    def test_schema_file_only_loaded_once(self):
+        with patch("builtins.open", mock_open(read_data="{}")) as mocked_open:
+            validate_json('{}', 'my_file')
+            validate_json('{}', 'my_file')
+            validate_json('{}', 'my_file')
+            self.assertEqual(1, mocked_open.call_count)
+
+    def test_can_reset_cache(self):
+        with patch("builtins.open", mock_open(read_data="{}")) as mocked_open:
+            validate_json('{}', 'my_file')
+            validate_json('{}', 'my_file')
+            self.assertEqual(1, mocked_open.call_count)
+            validate_json('{}', 'my_file', force_reload=True)
+            self.assertEqual(2, mocked_open.call_count)

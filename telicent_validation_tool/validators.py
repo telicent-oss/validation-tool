@@ -30,11 +30,15 @@ class TelicentValidationError(Exception):
     pass
 
 
-def validate_json(data: str, schema_file_path: str) -> bool | None:
+json_schema_cache = {}
+
+
+def validate_json(data: str, schema_file_path: str, force_reload: bool = False) -> bool | None:
     """
     Validates a JSON string against the schema in a given file.
 
     Args:
+        force_reload (bool): Force the schema file to be reloaded
         data (str): The JSON to validate
         schema_file_path (str): The file path containing the JSON schema
     Returns:
@@ -42,15 +46,20 @@ def validate_json(data: str, schema_file_path: str) -> bool | None:
     Raises:
         TelicentValidationError: On failure to validate
     """
-    with open(schema_file_path) as file:
-        schema = json.load(file)
-        try:
-            validate(instance=data, schema=schema)
-            logger.info('JSON is valid')
-            return True
-        except ValidationError as e:
-            logger.error(f'JSON validation error: {e}')
-            raise TelicentValidationError from e
+    if schema_file_path not in json_schema_cache or force_reload:
+        with open(schema_file_path) as file:
+            schema = json.load(file)
+            json_schema_cache[schema_file_path] = schema
+    else:
+        schema = json_schema_cache[schema_file_path]
+
+    try:
+        validate(instance=data, schema=schema)
+        logger.info('JSON is valid')
+        return True
+    except ValidationError as e:
+        logger.error(f'JSON validation error: {e}')
+        raise TelicentValidationError from e
 
 
 def validate_rdf_turtle(data: Graph, shacl_parts: list, ontology_parts: list) -> bool | None:
