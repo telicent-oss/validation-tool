@@ -1,6 +1,6 @@
 from json import JSONDecodeError
 from unittest import TestCase
-from unittest.mock import mock_open, patch
+from unittest.mock import ANY, mock_open, patch
 
 from jsonschema.exceptions import ValidationError
 
@@ -42,20 +42,20 @@ class JSONImplementationTestCase(TestCase):
     @staticmethod
     def test_validate_method_called():
         with patch("builtins.open", mock_open(read_data="{}")):
-            with patch("telicent_validation_tool.validators.validate") as mock_validate:
+            with patch("telicent_validation_tool.validators.fast_validate_json") as mock_validate:
                 validate_json('{}', 'my_file')
-            mock_validate.assert_called_with(instance='{}', schema={})
+            mock_validate.assert_called_with(instance='{}', schema={}, cls=ANY)
 
     def test_validate_true_returns_true(self):
         with patch("builtins.open", mock_open(read_data="{}")):
-            with patch("telicent_validation_tool.validators.validate") as mock_validate:
+            with patch("telicent_validation_tool.validators.fast_validate_json") as mock_validate:
                 mock_validate.return_value = True
                 self.assertTrue(validate_json('{}', 'my_file'))
 
     def test_validate_error_raises_error(self):
         with patch("builtins.open", mock_open(read_data="{}")):
             with patch(
-                target="telicent_validation_tool.validators.validate",
+                target="telicent_validation_tool.validators.fast_validate_json",
                 side_effect=ValidationError('Invalid')
             ):
                 self.assertRaises(TelicentValidationError, validate_json, '{}', 'my_file')
