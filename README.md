@@ -27,6 +27,14 @@ except TelicentValidationError as e:
     print(f"Validation error: {e}")
 ```
 
+The JSON schema file will only be loaded from disk on the first validation to improve the performance of subsequent validations. 
+
+To force a validation to reload the schema file from disk, set `force_reload=True`.
+
+```python
+validate_json(my_json, schema_path, force_reload=True)
+```
+
 ### SHACL Validation
 
 The SHACL validator provides a wrapper around Telicent's own [shacl-tool](https://github.com/Telicent-io/shacl-tool). It validates a rdf graph against the shacl and 
