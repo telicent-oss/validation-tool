@@ -1,8 +1,8 @@
 import json
 import logging
 
-from jsonschema import validate
-from jsonschema.exceptions import ValidationError
+from jsonschema.exceptions import ValidationError, best_match
+from jsonschema.validators import validator_for
 from rdflib import Graph
 from shacltool.owl2shacl import rdf_validate
 
@@ -33,6 +33,13 @@ class TelicentValidationError(Exception):
 json_schema_cache = {}
 
 
+def fast_validate_json(instance, schema, cls, *args, **kwargs):
+    validator = cls(schema, *args, **kwargs)
+    error = best_match(validator.iter_errors(instance))
+    if error is not None:
+        raise error
+
+
 def validate_json(data: str, schema_file_path: str, force_reload: bool = False) -> bool | None:
     """
     Validates a JSON string against the schema in a given file.
@@ -47,14 +54,20 @@ def validate_json(data: str, schema_file_path: str, force_reload: bool = False) 
         TelicentValidationError: On failure to validate
     """
     if schema_file_path not in json_schema_cache or force_reload:
+        logger.debug(f'Loading schema file {schema_file_path}')
         with open(schema_file_path) as file:
             schema = json.load(file)
+            logger.debug('Validating schema')
+            cls = validator_for(schema)
+            cls.check_schema(schema)
             json_schema_cache[schema_file_path] = schema
     else:
+        logger.debug('Using cached schema')
         schema = json_schema_cache[schema_file_path]
+        cls = validator_for(schema)
 
     try:
-        validate(instance=data, schema=schema)
+        fast_validate_json(instance=data, schema=schema, cls=cls)
         logger.info('JSON is valid')
         return True
     except ValidationError as e:
